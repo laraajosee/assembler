@@ -45,7 +45,11 @@
     controlpass     dw  0
     tamarch         dw  0
     handle      dw  ?
-    handle2 dw ?    ; Guardar asa  
+    handle2 dw ?    ; Guardar asa
+
+    tempDelay dw 10
+    unidades db 9
+    decenas db 2  
     
     cabeza db "        Universidad San Carlos De Guatemala ",10,13
     db "        Facultad De Ingeneria ", 10, 13
@@ -90,7 +94,25 @@ limpiarp macro
 endm    
 
 
-    
+ Delay2 MACRO constante
+	LOCAL D1,D2,Fin_delay
+	push si
+	push di
+
+	mov si,constante
+	D1:
+	dec si
+	jz Fin_delay
+	mov di,constante
+	D2:
+	dec di
+	jnz D2
+	jmp D1
+
+	Fin_delay:
+	pop di
+	pop si
+ENDM   
 
 
 imprime macro texto
@@ -495,6 +517,8 @@ errorpass:                                ;!!!!!!!!!!!!!!!!!!!!  error pass     
 salir:
     mov ax, 4c00h
     int 21h
+logCD:
+    mov lockedTemp, 00
 log:
     inicio:
     limpiarp
@@ -765,8 +789,7 @@ log:
         jmp e7a
      e7a: 
         
-        
-        e7a2:                                             ;para saber si el usuario esta blockeado
+                                                 ;para saber si el usuario esta blockeado
         mov si, 00h
         mov ah, 3fh
         mov bx, handle
@@ -805,9 +828,14 @@ log:
         inc controllock
         inc si
         mov typelock[si], '$'
-        jmp e7a2
+        jmp  e7a
 
-     e7c:  
+     e7c:  ; va a blockaer
+
+        mov al, typesaved
+        cmp al, worlAdmin
+        je coolDown 
+
         mov al, auxcontenidoar[0]
         mov memory[di], al
         inc di 
@@ -960,6 +988,98 @@ log:
         jne salir ;error salir
         mov ah,3eh ;Cierre de archivo
         int 21h
+        jmp salir
+
+coolDown: 
+        mov al,decenas
+        mov dl, al
+        add dl, 30h
+        mov ah,02h
+        int 21h
+               
+               ;imprimo unidades
+        mov al, unidades  
+        mov dl, al
+        add dl, 30h
+        mov ah,02h
+        int 21h 
+        Delay2 tempDelay 
+        
+        mov al, decenas
+        cmp al, 02h
+        je decUnidades
+        
+        
+        ;mov dx, decenas
+        ;inc dl
+        
+        ;mov decenas,dx
+        ;add dl, 30h
+        ;mov ah,02h
+        ;int 21h 
+        
+        decUnidades: 
+        
+               ;Resto 1 unidadad
+               mov al, unidades
+               dec al 
+               mov unidades, al  
+               ;imprimo decenas
+               mov al,decenas
+               mov dl, al
+               add dl, 30h
+               mov ah,02h
+               int 21h
+                
+               ;imprimo unidades
+               mov al, unidades  
+               mov dl, al
+               add dl, 30h
+               mov ah,02h
+               int 21h
+              
+               Delay2 tempDelay
+               
+               mov al, unidades
+               cmp al, 00h
+               je decDecenas
+               jne decUnidades  
+         decDecenas: 
+               mov al, decenas
+               cmp al, 00h
+               je logCD
+               
+         
+                
+               ;Resto 1 decenas
+               mov al, decenas
+               dec al 
+               mov decenas, al 
+               
+               ;unidades en 9
+               mov unidades, 09h
+               
+               ;imprimo decenas
+               mov al,decenas
+               mov dl, al
+               add dl, 30h
+               mov ah,02h
+               int 21h
+                
+               ;imprimo unidades
+               mov al, unidades  
+               mov dl, al
+               add dl, 30h
+               mov ah,02h
+               int 21h
+              
+               Delay2 tempDelay 
+               
+               
+
+               jmp decUnidades
+
+
                
         
  
