@@ -27,7 +27,7 @@
     typelock    db  100 dup('$') 
                                  
     text        db 'I am so happy!', 10,13                            
-    memory      db  100 dup('$') 
+    memory      db  250 dup('$') 
     controlMemory  dw  0     
     
     
@@ -474,14 +474,16 @@ errornoexiste:
     jmp salir
 errorpass:                                ;!!!!!!!!!!!!!!!!!!!!  error pass       !!!!!!  
     
-   
+
     mov ah, 3eh
     int 21h
+    ;mov al, auxcontenidoar[si]
+    ;mov memory[di], al
+    ;inc di
 
     inc lockedTemp
 
     mov ax, lockedTemp[0]
-    
     cmp al, 01h
     je firstTry 
     cmp al, 02h
@@ -549,8 +551,8 @@ log:
         mov usersaved[si], al  
         
         
-       ; mov memory[di], al
-        ;inc di 
+        mov memory[di], al
+        inc di 
         
         
         inc controlusers
@@ -558,9 +560,9 @@ log:
         mov usersaved[si], '$'
         jmp e1      ;sale hasta que encuentra una coma o un $
     e2: 
-        ;mov al, auxcontenidoar[si]
-        ;mov memory[di], al
-        ;inc di
+        mov al, auxcontenidoar[si]
+        mov memory[di], al
+        inc di
             
         calctamuser
         calctamuserle
@@ -587,9 +589,10 @@ log:
         mov cx, 1
         int 21h  
         ;memory 
-        ;mov al, auxcontenidoar[si]
-        ;mov memory[di], al
-        ;inc di 
+      
+        mov al, auxcontenidoar[si]
+        mov memory[di], al
+        inc di 
         
         
         cmp auxcontenidoar[si], 0dh   ;recorre el archivo hasta que encuentra un salto de linea
@@ -603,9 +606,9 @@ log:
         mov cx, 1
         int 21h 
         
-       ; mov al, auxcontenidoar[si]
-       ; mov memory[di], al
-        ;inc di 
+        mov al, auxcontenidoar[si]
+        mov memory[di], al
+        inc di 
         
         
         
@@ -647,8 +650,8 @@ log:
         mov si, controlpass
         mov passsaved[si], al
         
-        ;mov memory[di], al
-        ;inc di
+        mov memory[di], al
+        inc di
         
         
         inc controlpass
@@ -656,9 +659,9 @@ log:
         mov passsaved[si], '$'
         jmp e7
     e8:  
-        ;mov al, auxcontenidoar[si]
-        ;mov memory[di], al
-        ;inc di
+        mov al, auxcontenidoar[si]
+        mov memory[di], al
+        inc di
     
     
         calctampasss
@@ -678,6 +681,7 @@ log:
         inc si
         jmp e12
     e10:      ; cuando la pw es erronea              e10
+
         mov si, 00h
         mov controlpass, 0
         mov ah, 3fh
@@ -685,6 +689,7 @@ log:
         lea dx, auxcontenidoar
         mov cx, 1
         int 21h  
+       
         
         cmp auxcontenidoar[si], ','
         je e11
@@ -696,9 +701,9 @@ log:
         mov al, auxcontenidoar[si]
         mov si, controltype                            ; controltype
         mov typesaved[si], al
-        
-        ;mov memory[di], al
-        ;inc di
+         
+        mov memory[di], al
+        inc di
         
         inc controltype
         inc si
@@ -707,10 +712,13 @@ log:
 
         jmp e10
     e11: 
-    
+        mov ax, lockedTemp[0]
+        cmp al, 02h
+        je e7c 
+
         mov al, auxcontenidoar[si]
-        ;mov memory[di], al
-        ;inc di
+        mov memory[di], al
+        inc di
         
         mov si, 00h
         mov ah, 3fh
@@ -718,10 +726,6 @@ log:
         lea dx, auxcontenidoar
         mov cx, 1
         int 21h
-        
-        
-       
-       
        
         
         cmp auxcontenidoar[si], '$'
@@ -747,9 +751,9 @@ log:
         cmp al, 02h
         je noPasar 
         
-        ;mov al, auxcontenidoar[si]
-        ;mov memory[di], al
-       ; inc di
+        mov al, auxcontenidoar[si]
+        mov memory[di], al
+        inc di
          
         
         noPasar:
@@ -759,7 +763,10 @@ log:
                                              
         mov passsaved[si], '$'                          ;call e7
         jmp e7a
-     e7a:                                               ;para saber si el usuario esta blockeado
+     e7a: 
+        
+        
+        e7a2:                                             ;para saber si el usuario esta blockeado
         mov si, 00h
         mov ah, 3fh
         mov bx, handle
@@ -788,9 +795,9 @@ log:
         je noPasar2 
         
 
-        ;mov al, auxcontenidoar[0]
-        ;mov memory[di], al
-        ;inc di 
+        mov al, auxcontenidoar[0]
+        mov memory[di], al
+        inc di 
         
         noPasar2:
         
@@ -798,7 +805,95 @@ log:
         inc controllock
         inc si
         mov typelock[si], '$'
-        jmp e7a 
+        jmp e7a2
+
+     e7c:  
+        mov al, auxcontenidoar[0]
+        mov memory[di], al
+        inc di 
+
+        mov memory[di], 'l'
+        inc di 
+        mov memory[di], 'o' 
+        inc di 
+        mov memory[di], 'c'
+        inc di 
+        mov memory[di], 'k'  
+        inc di 
+        mov memory[di], 'e' 
+        inc di 
+        mov memory[di], 'd'
+        inc di
+        mov memory[di], 0dh
+        inc di 
+
+        e7cc:
+        mov si, 00h
+        mov ah, 3fh
+        mov bx, handle
+        lea dx, auxcontenidoar
+        mov cx, 1
+        int 21h
+        
+        
+
+        cmp auxcontenidoar[si], 0dh
+        je loquear
+        cmp auxcontenidoar[si], 0ah
+        je loquear
+       
+       
+        mov al, auxcontenidoar[si]
+        ;mov si, controllock
+        ;mov typelock[si], al 
+        
+          
+       ; mov ax, lockedTemp[0]
+        ;mov al, 0
+        mov al, auxcontenidoar[si]
+        ;mov memory[di], al
+        ;inc di 
+         
+        
+
+       
+    
+        inc si
+        ;mov typelock[si], '$'
+        jmp e7cc
+     loquear:                                              
+        mov si, 00h
+        mov ah, 3fh
+        mov bx, handle
+        lea dx, auxcontenidoar
+        mov cx, 1
+        int 21h
+        
+        
+
+        cmp auxcontenidoar[si], '$'   ;lee la contra igual que el locked
+        je hola
+       
+       
+        mov al, auxcontenidoar[si]
+        ;mov si, controllock
+        ;mov typelock[si], al 
+            
+          
+       ; mov ax, lockedTemp[0]
+        ;mov al, 0
+       
+        
+
+        ;mov al, auxcontenidoar[0]
+        mov memory[di], al
+        inc di 
+        
+        
+        ;inc controllock
+        inc si
+        ;mov typelock[si], '$'
+        jmp loquear
      firstTry: 
         ;mov [usering] , '$'
         ;mov passing , '$'
@@ -820,34 +915,12 @@ log:
         imprime Stry  
         jmp regresoError 
      treedTry:
-        mov usersaved , '$'
-        mov passsaved , '$'
-         
-        dec di 
-        dec di
-        mov memory[di], 'l'
+     
+        hola:
+        mov al, auxcontenidoar[si]      
+        mov memory[di], al
         inc di 
-        mov memory[di], 'o' 
-        inc di 
-        mov memory[di], 'c'
-        inc di 
-        mov memory[di], 'k'  
-        inc di 
-        mov memory[di], 'e' 
-        inc di 
-        mov memory[di], 'd'
-        inc di
-        mov memory[di], 0dh
-        inc di  
-        
-        
-        ;mov al, auxcontenidoar[0]
-        ;mov memory[di], al
-        ;inc di 
-           
-        
-         
-        ;imprime salto 
+
         jmp crear
         limpiarp
         imprime Ttry  
