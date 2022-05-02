@@ -109,12 +109,14 @@
     naveFila6       db  15, 15, 15, 15, 15,	11,	15,	15,	15,	15,	15
         ;disparo
         ;moustro
-    moustro1        db  00, 00, 00, 00, 01, 01, 00, 00, 00, 00, 00
-    moustro2        db  00, 01, 00, 01, 01, 01, 01, 00, 01, 00, 00
-    moustro3        db  00, 00, 01, 00, 01, 01, 00, 01, 00, 00, 00
-    moustro4        db  00, 01, 01, 01, 01, 01, 01, 01, 01, 00, 00
-    moustro5        db  00, 01, 01, 01, 00, 00, 01, 01, 01, 01, 00
-    moustro6        db  01, 01, 01, 01, 00, 00, 01, 01, 01, 01, 00
+    moustro1        db  00, 01, 00, 00, 00, 01, 00, 00 
+    moustro2        db  00, 00, 01, 00, 01, 00, 00, 00 
+    moustro3        db  00, 01, 01, 01, 01, 01, 00, 00 
+    moustro4        db  00, 01, 00, 01, 00, 01, 01, 00 
+    moustro5        db  01, 01, 01, 01, 01, 01, 01, 01 
+    moustro6        db  01, 01, 00, 00, 00, 00, 01, 01
+    moustro7        db  00, 01, 00, 00, 00, 00, 01, 00 
+    moustro8        db  00, 01, 01, 00, 00, 01, 01, 00
         ;disparo
     disparoFila1    db  12
     disparoFila2    db  29
@@ -130,6 +132,7 @@
 
     xene            dw  0
     yene            dw  0
+    opcionEne       dw  '0','$'
 
     l1              db  'EJEMPLO 5', 10, 13, '$'
     l2              db  'SE PULSO F1', 10, 13, '$'
@@ -140,7 +143,10 @@
     userNameWord  db  'UserName:', 10, 13, '$'
     lvlUserWord  db  10, 13,10, 13,'Level:', 10, 13, '$'
     timeWord  db  10, 13,10, 13,'Time:', 10, 13, '$'
-    lives  db  10, 13,10, 13,'lives:', 10, 13, '$' 
+    lives  db  10, 13,10, 13,'lives:', 10, 13, '$'
+    pressSpace db  10, 13,10, 13,'Space!', 10, 13, 'To start', '$'
+    pressEsc db  10, 13,10, 13,'Esc', 10, 13, 'To Menu', '$'
+    
 
     lvl db '      1','$'
     time db '00:00','$'
@@ -175,12 +181,8 @@ imprimirnombre macro
         mov dx, offset userNameWord
         mov ah, 09h
         int 21h
-        
-        mov ah, 02h
-        mov bh, 00h
-        mov dh, 04
-        mov dl, 0
-        int 10h
+       
+       
         mov dx, offset usering
         mov ah, 09h
         int 21h
@@ -205,6 +207,22 @@ imprimirnombre macro
         mov dx, offset lives
         mov ah, 09h
         int 21h
+
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 17
+        mov dl, 0
+        int 10h
+
+        mov ax, opcionEne
+        cmp al, '0'
+        je spacee
+        jmp e2
+
+        spacee:
+            mov dx, offset pressSpace
+            mov ah, 09h
+            int 21h
 
         
 
@@ -293,17 +311,22 @@ dibujarEnemigo macro
     mul cx
     add ax, bx
     mov di, ax
-    auxdiblinea moustro1, 11
+    auxdiblinea moustro1, 8
     add ax, 320
-    auxdiblinea moustro2, 11
+    auxdiblinea moustro2, 8
     add ax, 320
-    auxdiblinea moustro3, 11
+    auxdiblinea moustro3, 8
     add ax, 320
-    auxdiblinea moustro4, 11
+    auxdiblinea moustro4, 8
     add ax, 320
-    auxdiblinea moustro5, 11
+    auxdiblinea moustro5, 8
     add ax, 320
-    auxdiblinea moustro6, 11
+    auxdiblinea moustro6, 8
+    add ax, 320
+    auxdiblinea moustro7, 8
+    add ax, 320
+    auxdiblinea moustro8, 8
+    
 endm
 
 VSync proc
@@ -425,18 +448,23 @@ dibujarmarco macro
 
         e3hot:
         push si
+       
+        sub ax, 20
+        auxdiblinea lineamarco, 20
         sub ax, 20
         auxdiblinea lineamarco, 20
         sub ax, 20
         auxdiblinea lineamarco, 20
         sub ax, 10
-        auxdiblinea lineamarco, 20 
-        add ax, 320 
+        auxdiblinea lineamarco, 20  
+        add ax, 320
         auxdiblinea lineamarco, 20 
         add ax, 20
         auxdiblinea lineamarco, 20
         add ax, 10
         auxdiblinea lineamarco, 20 
+        add ax, 20
+        auxdiblinea lineamarco, 20
         add ax, 20
         ;inc si 
         pop si
@@ -1563,7 +1591,7 @@ log:
     mov xnave, 150
     mov ynave, 185
     mov xene, 75
-    mov yene, 50
+    mov yene, 23
 inicioj:
     call limpiarpantallag
     ;se guardan los valores de los registros ax y bx ya que se modificaran 
@@ -1576,9 +1604,9 @@ inicioj:
     mov ax, ynave ;coordenada y de la nave
     mov bx, xnave ; coordenada x de la nave
     dibujarnave
-    mov ax, yene;coordenada y de la nave
-    mov bx, xene ; coordenada x de la nave
-    dibujarEnemigo
+    jmp moverEne
+    regresarEne:
+   
     mov ax, ydis ; coordenada y del disparo
     mov bx, xdis ; coordenada x del disparo
     redibujardis ; manda a llamar la macro para redibujar el disparo
@@ -1587,20 +1615,22 @@ inicioj:
     pop ax
     ;se llaman los metodos para la sincronizacion de la pantalla
     ;esto se usa para que no titile tanto la pantalla
-    call VSync
+    
     call VSync
     call Delay; jugar con los valores del delay para que no titile tanto la pantalla
     call HasKey;este procedimiento verifica que se haya pulsado una tecla, si no regresa al inicio del juego a repintar la pantalla
     jz inicioj
     call GetChar;verifica la tecla que pulso
     cmp al, 20h;tecla de espacio
-    je disparar
-    cmp al, 76h;v minuscula para disparar
+    je cambiarEne
+    cmp ax, 4800h;v minuscula para disparar
     je disparar
     cmp ax, 4b00h;flecha de la izquierda
     je moverizq
     cmp ax, 4d00h;flecha de la derecha
     je moverder
+    cmp al, 1Bh;escB
+    je pausa
     jmp inicioj;vuelve al inicio del juevo para repintar la pantalla
 disparar:
     cmp ydis, 0;verifica que no haya disparo
@@ -1625,6 +1655,64 @@ disparar1:
     pop bx
     pop ax
     jmp inicioj
+moverEne:
+;guarda los valores de ax y bx en la pila
+    push ax
+
+    
+    mov ax, opcionEne
+    cmp al, '0'
+    je opcion0
+    cmp al, '1'
+    je opcion1
+    cmp al, '2'
+    je opcion2
+    cmp al, '3'
+    je opcion3
+
+
+
+   
+  
+    opcion0:
+        jmp regresarEne 
+    opcion1:
+        mov ax, yene;coordenada y de la nave
+        mov bx, xene ; coordenada x de la nave
+       
+        dibujarEnemigo
+
+        ;limpia los valores de ax y bx
+        
+        mov opcionEne, '2'
+        inc yene
+
+        mov ax, yene
+        cmp ax, 185
+        je finj
+        pop ax
+
+        
+        jmp regresarEne 
+    opcion2: 
+        mov ax, yene;coordenada y de la nave
+        mov bx, xene ; coordenada x de la nave
+        dibujarEnemigo
+        mov opcionEne, '3'
+        jmp regresarEne 
+    opcion3: 
+        mov ax, yene;coordenada y de la nave
+        mov bx, xene ; coordenada x de la nave
+        dibujarEnemigo
+        mov opcionEne, '1'
+        jmp regresarEne
+
+
+    cambiarEne:
+        mov opcionEne, '1'
+        jmp regresarEne 
+    
+      
 moverizq:
     push ax
     mov ax, xnave; movemos la posicion de la nave al registro ax
@@ -1655,6 +1743,28 @@ imprimirf1:
     jmp salir
 imprimirf2:
     imprimir l3
+pausa:
+    mov ah, 02h
+    mov bh, 00h
+    mov dh, 17
+    mov dl, 0
+    int 10h
+
+    mov dx, offset pressSpace
+    mov ah, 09h
+    int 21h
+    mov dx, offset pressEsc
+    mov ah, 09h
+    int 21h
+       
+           
+    call GetChar;verifica la tecla que pulso
+    cmp al, 20h;tecla de espacio
+    je inicioj
+    cmp al, 1Bh;escB
+    je pausa
+    jmp pausa;vuelve al inicio del juevo para repintar la pantalla  
+
 
 main endp
 end main
