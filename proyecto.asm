@@ -1670,11 +1670,11 @@ moverEne:
     cmp al, '3'
     je opcion3
 
-
-
-   
-  
     opcion0:
+        mov ax, yene;coordenada y de la nave
+        mov bx, xene ; coordenada x de la nave
+       
+        dibujarEnemigo
         jmp regresarEne 
     opcion1:
         mov ax, yene;coordenada y de la nave
