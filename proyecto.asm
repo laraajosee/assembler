@@ -132,6 +132,8 @@
 
     xene            dw  0
     yene            dw  0
+    xene1            dw  0
+    yene1            dw  0
     opcionEne       dw  '0','$'
 
     l1              db  'EJEMPLO 5', 10, 13, '$'
@@ -146,10 +148,22 @@
     lives  db  10, 13,10, 13,'lives:', 10, 13, '$'
     pressSpace db  10, 13,10, 13,'Space!', 10, 13, 'To start', '$'
     pressEsc db  10, 13,10, 13,'Esc', 10, 13, 'To Menu', '$'
+    vidaEne db 1,1,1,1,1,1,1
+    cordX db 75,105,135,165,195,225,250
+    cordY db 23,23,23,23,23,23,23
     
 
     lvl db '      1','$'
     time db '00:00','$'
+
+       ;tiempo
+    minutos         db  0
+    decminutos      db  0
+    uniminutos      db  0
+    segundos        db  0
+    decsegundos     db  0
+    unisegundos     db  0
+    micsegundos     db  0
     
 
 .code
@@ -159,6 +173,97 @@ GetChar proc
     int 16h
     ret
 GetChar endp
+
+imprimirtiempo macro
+    local e1
+    mov al, minutos
+    aam
+    mov decminutos, ah
+    mov uniminutos, al
+    mov al, segundos
+    aam
+    mov decsegundos, ah
+    mov unisegundos, al
+    
+    mov dl, 35
+    e1:
+        ;mov ah, 02h
+        ;mov dh, 0
+        ;mov dl, dl
+        ;int 10h
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 10
+        mov dl, 0
+        int 10h
+
+        mov ah, 09h
+        add decminutos, '0'
+        mov al, decminutos
+        mov bl, 1fh
+        mov cx, 1
+        int 10h
+
+        inc dl
+
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 10
+        mov dl, 1
+        int 10h
+
+        mov ah, 09h
+        add uniminutos, '0'
+        mov al, uniminutos
+        mov bl, 1fh
+        mov cx, 1
+        int 10h
+
+        inc dl
+
+
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 10
+        mov dl, 2
+        int 10h
+
+        mov ah, 09h
+        mov al, 58
+        mov bl, 1fh
+        mov cx, 1
+        int 10h
+
+        inc dl
+
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 10
+        mov dl, 3
+        int 10h
+
+        mov ah, 09h
+        add decsegundos, '0'
+        mov al, decsegundos
+        mov bl, 1fh
+        mov cx, 1
+        int 10h
+
+        inc dl
+        
+        mov ah, 02h
+        mov bh, 00h
+        mov dh, 10
+        mov dl, 4
+        int 10h
+
+        mov ah, 09h
+        add unisegundos, '0'
+        mov al, unisegundos
+        mov bl, 1fh
+        mov cx, 1
+        int 10h
+endm
 
 imprimir macro texto
     mov dx, offset texto
@@ -200,9 +305,9 @@ imprimirnombre macro
         mov ah, 09h
         int 21h
 
-        mov dx, offset time
-        mov ah, 09h
-        int 21h
+       ; mov dx, offset time
+        ;mov ah, 09h
+        ;int 21h
 
         mov dx, offset lives
         mov ah, 09h
@@ -307,26 +412,59 @@ dibujarnave macro
 endm
 
 dibujarEnemigo macro
-    mov cx, 320
-    mul cx
-    add ax, bx
-    mov di, ax
-    auxdiblinea moustro1, 8
-    add ax, 320
-    auxdiblinea moustro2, 8
-    add ax, 320
-    auxdiblinea moustro3, 8
-    add ax, 320
-    auxdiblinea moustro4, 8
-    add ax, 320
-    auxdiblinea moustro5, 8
-    add ax, 320
-    auxdiblinea moustro6, 8
-    add ax, 320
-    auxdiblinea moustro7, 8
-    add ax, 320
-    auxdiblinea moustro8, 8
+    local imprimirEnemigos, regreso, salirr
+  
+    push si
+    mov si, 0000
+
+    regreso:
+    mov cx,0000
+    mov ax, 0000
+    cmp si, 7
+    je salirr
+    lea dx, vidaEne 
+    mov al, vidaEne[si]  
+    cmp al, 01h
+    je imprimirEnemigos
     
+       
+    imprimirEnemigos: 
+        push si
+        lea dx, cordY
+        mov al, cordY[si]
+        ;lea dx, cordX
+        ;mov bx, cordX[si]
+        ;mov ax, al;coordenada y de la nave
+        lea dx, cordx
+        mov bl, cordx[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro1, 8
+        add ax, 320
+        auxdiblinea moustro2, 8
+        add ax, 320
+        auxdiblinea moustro3, 8
+        add ax, 320
+        auxdiblinea moustro4, 8
+        add ax, 320
+        auxdiblinea moustro5, 8
+        add ax, 320
+        auxdiblinea moustro6, 8
+        add ax, 320
+        auxdiblinea moustro7, 8
+        add ax, 320
+        auxdiblinea moustro8, 8
+        pop si
+        inc si
+        jmp regreso
+    
+    salirr:
+    pop si
+   
 endm
 
 VSync proc
@@ -1592,15 +1730,46 @@ log:
     mov ynave, 185
     mov xene, 75
     mov yene, 23
+
+    mov xene1, 100
+    mov yene1, 23
 inicioj:
     call limpiarpantallag
     ;se guardan los valores de los registros ax y bx ya que se modificaran 
     push ax
     push bx
     imprimirnombre
+    imprimirtiempo
     mov ax, 20 ;y
     mov bx, 50 ;x
     dibujarmarco
+
+    tiempo1:
+        mov al, micsegundos
+        inc al
+        cmp al, 10
+        je masseg
+        mov micsegundos, al
+        jmp inicioj2
+    masseg:
+        mov al, segundos
+        inc al
+        cmp al, 60
+        je masmin
+        mov segundos, al
+        mov al, 0
+        mov micsegundos, al
+        jmp inicioj2
+    masmin:
+        mov al, minutos
+        inc al
+        mov minutos, al
+        mov al, 0
+        mov segundos, al
+        mov micsegundos, al
+
+    inicioj2:
+
     mov ax, ynave ;coordenada y de la nave
     mov bx, xnave ; coordenada x de la nave
     dibujarnave
@@ -1667,18 +1836,19 @@ moverEne:
     je opcion1
     cmp al, '2'
     je opcion2
+
     cmp al, '3'
     je opcion3
 
     opcion0:
-        mov ax, yene;coordenada y de la nave
-        mov bx, xene ; coordenada x de la nave
+        ;mov ax, yene;coordenada y de la nave
+        ;mov bx, xene ; coordenada x de la nave
        
         dibujarEnemigo
         jmp regresarEne 
     opcion1:
-        mov ax, yene;coordenada y de la nave
-        mov bx, xene ; coordenada x de la nave
+        ;mov ax, yene;coordenada y de la nave
+        ;mov bx, xene ; coordenada x de la nave
        
         dibujarEnemigo
 
