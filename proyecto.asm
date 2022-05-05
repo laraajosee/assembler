@@ -148,6 +148,10 @@
     ydis            dw  0
     contador        dw  0
 
+    holimoustro     dw 0
+
+    movMoustro      dw  0
+
     xene            dw  0
     yene            dw  0
     xene1            dw  0
@@ -380,9 +384,9 @@ redibujardis macro
     cmp ydis, 0
     je salir
     ;cada vez que se repinta 5 veces la pantalla va a subir el disparo 1 pixel
-    inc contador
-    cmp contador, 5
-    je e1
+    ;inc contador
+    ;cmp contador, 0
+    ;je e1
     e1:
     sub ax, 1
     mov ydis, ax
@@ -433,7 +437,7 @@ dibujarnave macro
 endm
 
 dibujarEnemigo macro
-    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer
+    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida
   
     push si
     mov si, 0000
@@ -486,6 +490,11 @@ dibujarEnemigo macro
         auxdiblinea moustro7, 8
         add ax, 320
         auxdiblinea moustro8, 8
+
+
+
+
+
         pop si
         inc si
         jmp regreso
@@ -552,6 +561,34 @@ dibujarEnemigo macro
         auxdiblinea moustro37, 8
         add ax, 320
         auxdiblinea moustro38, 8
+
+        mov ax,00000h
+        lea dx, cordY
+        mov al, cordY[0]  
+        cmp ax, ydis[0]
+        je ver
+        jmp saltarVer
+
+        ver:
+            mov ax, 00000h
+            lea dx, cordx
+            mov al, cordX[0] 
+            inc al
+            inc al
+            inc al
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida
+            jmp saltarVer
+            quitarvida:
+                ;lea dx, vidaEne 
+                mov vidaEne[0], 2
+                mov ydis, 0
+                mov xdis, 0
+                jmp saltarVer
+
+        saltarVer:
+     
         pop si
         inc si
         jmp regreso
@@ -1931,7 +1968,13 @@ moverEne:
     push bx
     push si
 
-    
+    inc movMoustro
+    mov ax, movMoustro
+    cmp al, 5
+    jne saliAqui
+   
+    mov movMoustro, 0
+
     mov ax, opcionEne
     cmp al, '0'
     je opcion0
@@ -1979,11 +2022,6 @@ moverEne:
     je opcionl
 
 
-
-
-
-
-
     opcion0:
 
         dibujarEnemigo
@@ -1992,11 +2030,13 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[0]  
-        cmp al, 190
+        cmp al, 187
         je incrSi
 
         inc al
         mov cordY[0],al
+
+
 
         jmp regresarEne 
         incrSi:
@@ -2007,7 +2047,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[1]  
-        cmp al, 190
+        cmp al, 187
         je incrSi1
 
         inc al
@@ -2022,7 +2062,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[2]  
-        cmp al, 190
+        cmp al, 187
         je incrSi2
 
         inc al
@@ -2038,7 +2078,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[3]  
-        cmp al, 190
+        cmp al, 187
         je incrSi3
 
         inc al
@@ -2053,7 +2093,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[4]  
-        cmp al, 190
+        cmp al, 187
         je incrSi4
 
         inc al
@@ -2068,7 +2108,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[5]  
-        cmp al, 190
+        cmp al, 187
         je incrSi5
 
         inc al
@@ -2083,7 +2123,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[6]  
-        cmp al, 190
+        cmp al, 187
         je incrSi6
 
         inc al
@@ -2098,7 +2138,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[7]  
-        cmp al, 190
+        cmp al, 187
         je incrSi7
 
         inc al
@@ -2113,7 +2153,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[8]  
-        cmp al, 190
+        cmp al, 187
         je incrSi8
 
         inc al
@@ -2128,7 +2168,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[9]  
-        cmp al, 190
+        cmp al, 187
         je incrSi9
 
         inc al
@@ -2143,7 +2183,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[10]  
-        cmp al, 190
+        cmp al, 187
         je incrSib
 
         inc al
@@ -2158,7 +2198,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[11]  
-        cmp al, 190
+        cmp al, 187
         je incrSic
 
         inc al
@@ -2173,7 +2213,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[12]  
-        cmp al, 190
+        cmp al, 187
         je incrSid
 
         inc al
@@ -2188,7 +2228,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[13]  
-        cmp al, 190
+        cmp al, 187
         je incrSie
 
         inc al
@@ -2203,7 +2243,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[14]  
-        cmp al, 190
+        cmp al, 187
         je incrSif
 
         inc al
@@ -2218,7 +2258,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[15]  
-        cmp al, 190
+        cmp al, 187
         je incrSig
 
         inc al
@@ -2233,7 +2273,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[16]  
-        cmp al, 190
+        cmp al, 187
         je incrSih
 
         inc al
@@ -2248,7 +2288,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[17]  
-        cmp al, 190
+        cmp al, 187
         je incrSii
 
         inc al
@@ -2263,7 +2303,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[18]  
-        cmp al, 190
+        cmp al, 187
         je incrSij
 
         inc al
@@ -2278,7 +2318,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[19]  
-        cmp al, 190
+        cmp al, 187
         je incrSik
 
         inc al
@@ -2293,7 +2333,7 @@ moverEne:
         dibujarEnemigo
         lea dx, cordY 
         mov al, cordY[20]  
-        cmp al, 190
+        cmp al, 187
         je incrSil
 
         inc al
@@ -2310,8 +2350,10 @@ moverEne:
     cambiarEne:
         mov opcionEne, '1'
         jmp regresarEne 
+    saliAqui:
     
-    
+        dibujarEnemigo
+        jmp regresarEne 
     pop bx
     pop ax 
     pop si 
