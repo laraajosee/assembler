@@ -109,6 +109,15 @@
     naveFila6       db  15, 15, 15, 15, 15,	11,	15,	15,	15,	15,	15
         ;disparo
         ;moustro
+    moustro21        db  00, 10, 00, 00, 00, 10, 00, 00 
+    moustro22        db  00, 00, 10, 00, 10, 00, 00, 00 
+    moustro23        db  00, 10, 10, 10, 10, 10, 00, 00 
+    moustro24        db  00, 10, 00, 10, 00, 10, 10, 00 
+    moustro25        db  10, 10, 10, 10, 10, 10, 10, 10 
+    moustro26        db  10, 10, 00, 00, 00, 00, 10, 10
+    moustro27        db  00, 10, 00, 00, 00, 00, 10, 00 
+    moustro28        db  00, 10, 10, 00, 00, 10, 10, 00
+
     moustro1        db  00, 01, 00, 00, 00, 01, 00, 00 
     moustro2        db  00, 00, 01, 00, 01, 00, 00, 00 
     moustro3        db  00, 01, 01, 01, 01, 01, 00, 00 
@@ -117,6 +126,15 @@
     moustro6        db  01, 01, 00, 00, 00, 00, 01, 01
     moustro7        db  00, 01, 00, 00, 00, 00, 01, 00 
     moustro8        db  00, 01, 01, 00, 00, 01, 01, 00
+
+    moustro31        db  00, 14, 00, 00, 00, 14, 00, 00 
+    moustro32        db  00, 00, 14, 00, 14, 00, 00, 00 
+    moustro33        db  00, 14, 14, 14, 14, 14, 00, 00 
+    moustro34        db  00, 14, 00, 14, 00, 14, 14, 00 
+    moustro35        db  14, 14, 14, 14, 14, 14, 14, 14 
+    moustro36        db  14, 14, 00, 00, 00, 00, 14, 14
+    moustro37        db  00, 14, 00, 00, 00, 00, 14, 00 
+    moustro38        db  00, 14, 14, 00, 00, 14, 14, 00  
         ;disparo
     disparoFila1    db  12
     disparoFila2    db  29
@@ -148,9 +166,10 @@
     lives  db  10, 13,10, 13,'lives:', 10, 13, '$'
     pressSpace db  10, 13,10, 13,'Space!', 10, 13, 'To start', '$'
     pressEsc db  10, 13,10, 13,'Esc', 10, 13, 'To Menu', '$'
-    vidaEne db 1,1,1,1,1,1,1
-    cordX db 75,105,135,165,195,225,250
-    cordY db 23,23,23,23,23,23,23
+    vidaEne db 3,3,3,3,3,3,3,2,2,2,2,2,2,2,1,1,1,1,1,1,1
+
+    cordX db 75,105,135,165,195,225,250,75,105,135,165,195,225,250,75,105,135,165,195,225,250
+    cordY db 41,41,41,41,41,41,41,32,32,32,32,32,32,32,23,23,23,23,23,23,23
     
 
     lvl db '      1','$'
@@ -164,6 +183,8 @@
     decsegundos     db  0
     unisegundos     db  0
     micsegundos     db  0
+
+    contadorEne db 0
     
 
 .code
@@ -412,7 +433,7 @@ dibujarnave macro
 endm
 
 dibujarEnemigo macro
-    local imprimirEnemigos, regreso, salirr
+    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer
   
     push si
     mov si, 0000
@@ -420,15 +441,22 @@ dibujarEnemigo macro
     regreso:
     mov cx,0000
     mov ax, 0000
-    cmp si, 7
+    cmp si, 21
     je salirr
     lea dx, vidaEne 
     mov al, vidaEne[si]  
     cmp al, 01h
-    je imprimirEnemigos
+    je enemigoNivel1
+    cmp al, 02h
+    je enemigoNivel2
+    cmp al, 03h
+    je enemigoNivel3
+    cmp al, 00h
+    je desaparecer
+    
     
        
-    imprimirEnemigos: 
+    enemigoNivel1: 
         push si
         lea dx, cordY
         mov al, cordY[si]
@@ -461,6 +489,79 @@ dibujarEnemigo macro
         pop si
         inc si
         jmp regreso
+    enemigoNivel2: 
+        push si
+        lea dx, cordY
+        mov al, cordY[si]
+        ;lea dx, cordX
+        ;mov bx, cordX[si]
+        ;mov ax, al;coordenada y de la nave
+        lea dx, cordx
+        mov bl, cordx[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro21, 8
+        add ax, 320
+        auxdiblinea moustro22, 8
+        add ax, 320
+        auxdiblinea moustro23, 8
+        add ax, 320
+        auxdiblinea moustro24, 8
+        add ax, 320
+        auxdiblinea moustro25, 8
+        add ax, 320
+        auxdiblinea moustro26, 8
+        add ax, 320
+        auxdiblinea moustro27, 8
+        add ax, 320
+        auxdiblinea moustro28, 8
+        pop si
+        inc si
+        jmp regreso
+    enemigoNivel3: 
+        push si
+        lea dx, cordY
+        mov al, cordY[si]
+        ;lea dx, cordX
+        ;mov bx, cordX[si]
+        ;mov ax, al;coordenada y de la nave
+        lea dx, cordx
+        mov bl, cordx[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro31, 8
+        add ax, 320
+        auxdiblinea moustro32, 8
+        add ax, 320
+        auxdiblinea moustro33, 8
+        add ax, 320
+        auxdiblinea moustro34, 8
+        add ax, 320
+        auxdiblinea moustro35, 8
+        add ax, 320
+        auxdiblinea moustro36, 8
+        add ax, 320
+        auxdiblinea moustro37, 8
+        add ax, 320
+        auxdiblinea moustro38, 8
+        pop si
+        inc si
+        jmp regreso
+    desaparecer: 
+        push si
+       
+        pop si
+        inc si
+        jmp regreso
+    
     
     salirr:
     pop si
@@ -1827,6 +1928,8 @@ disparar1:
 moverEne:
 ;guarda los valores de ax y bx en la pila
     push ax
+    push bx
+    push si
 
     
     mov ax, opcionEne
@@ -1836,53 +1939,382 @@ moverEne:
     je opcion1
     cmp al, '2'
     je opcion2
-
     cmp al, '3'
     je opcion3
+    cmp al, '4'
+    je opcion4
+    cmp al, '5'
+    je opcion5
+    cmp al, '6'
+    je opcion6
+    cmp al, '7'
+    je opcion7
+    cmp al, '8'
+    je opcion8
+    cmp al, '9'
+    je opcion9
+    cmp al, 'a'
+    je opciona
+    cmp al, 'b'
+    je opcionb
+    cmp al, 'c'
+    je opcionc
+    cmp al, 'd'
+    je opciond
+    cmp al, 'e'
+    je opcione
+    cmp al, 'f'
+    je opcionf
+    cmp al, 'g'
+    je opciong
+    cmp al, 'h'
+    je opcionh
+    cmp al, 'i'
+    je opcioni
+    cmp al, 'j'
+    je opcionj
+    cmp al, 'k'
+    je opcionk
+    cmp al, 'l'
+    je opcionl
+
+
+
+
+
+
 
     opcion0:
-        ;mov ax, yene;coordenada y de la nave
-        ;mov bx, xene ; coordenada x de la nave
-       
+
         dibujarEnemigo
         jmp regresarEne 
     opcion1:
-        ;mov ax, yene;coordenada y de la nave
-        ;mov bx, xene ; coordenada x de la nave
-       
         dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[0]  
+        cmp al, 190
+        je incrSi
 
-        ;limpia los valores de ax y bx
-        
-        mov opcionEne, '2'
-        inc yene
+        inc al
+        mov cordY[0],al
 
-        mov ax, yene
-        cmp ax, 185
-        je finj
-        pop ax
-
-        
         jmp regresarEne 
-    opcion2: 
-        mov ax, yene;coordenada y de la nave
-        mov bx, xene ; coordenada x de la nave
+        incrSi:
+            mov vidaEne[0],0
+            mov opcionEne, '2'
+            jmp regresarEne
+    opcion2:
         dibujarEnemigo
-        mov opcionEne, '3'
+        lea dx, cordY 
+        mov al, cordY[1]  
+        cmp al, 190
+        je incrSi1
+
+        inc al
+        mov cordY[1],al
+
         jmp regresarEne 
-    opcion3: 
-        mov ax, yene;coordenada y de la nave
-        mov bx, xene ; coordenada x de la nave
+        incrSi1:
+            mov vidaEne[1],0
+            mov opcionEne, '3'
+            jmp regresarEne  
+     opcion3:
         dibujarEnemigo
-        mov opcionEne, '1'
-        jmp regresarEne
+        lea dx, cordY 
+        mov al, cordY[2]  
+        cmp al, 190
+        je incrSi2
+
+        inc al
+        mov cordY[2],al
+
+        jmp regresarEne 
+        incrSi2:
+            mov vidaEne[2],0
+            mov opcionEne, '4'
+            jmp regresarEne
+
+    opcion4:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[3]  
+        cmp al, 190
+        je incrSi3
+
+        inc al
+        mov cordY[3],al
+
+        jmp regresarEne 
+        incrSi3:
+            mov vidaEne[3],0
+            mov opcionEne, '5'
+            jmp regresarEne
+    opcion5:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[4]  
+        cmp al, 190
+        je incrSi4
+
+        inc al
+        mov cordY[4],al
+
+        jmp regresarEne 
+        incrSi4:
+            mov vidaEne[4],0
+            mov opcionEne, '6'
+            jmp regresarEne
+    opcion6:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[5]  
+        cmp al, 190
+        je incrSi5
+
+        inc al
+        mov cordY[5],al
+
+        jmp regresarEne 
+        incrSi5:
+            mov vidaEne[5],0
+            mov opcionEne, '7'
+            jmp regresarEne   
+    opcion7:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[6]  
+        cmp al, 190
+        je incrSi6
+
+        inc al
+        mov cordY[6],al
+
+        jmp regresarEne 
+        incrSi6:
+            mov vidaEne[6],0
+            mov opcionEne, '8'
+            jmp regresarEne 
+    opcion8:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[7]  
+        cmp al, 190
+        je incrSi7
+
+        inc al
+        mov cordY[7],al
+
+        jmp regresarEne 
+        incrSi7:
+            mov vidaEne[7],0
+            mov opcionEne, '9'
+            jmp regresarEne 
+    opcion9:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[8]  
+        cmp al, 190
+        je incrSi8
+
+        inc al
+        mov cordY[8],al
+
+        jmp regresarEne 
+        incrSi8:
+            mov vidaEne[8],0
+            mov opcionEne, 'a'
+            jmp regresarEne   
+    opciona:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[9]  
+        cmp al, 190
+        je incrSi9
+
+        inc al
+        mov cordY[9],al
+
+        jmp regresarEne 
+        incrSi9:
+            mov vidaEne[9],0
+            mov opcionEne, 'b'
+            jmp regresarEne 
+    opcionb:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[10]  
+        cmp al, 190
+        je incrSib
+
+        inc al
+        mov cordY[10],al
+
+        jmp regresarEne 
+        incrSib:
+            mov vidaEne[10],0
+            mov opcionEne, 'c'
+            jmp regresarEne    
+    opcionc:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[11]  
+        cmp al, 190
+        je incrSic
+
+        inc al
+        mov cordY[11],al
+
+        jmp regresarEne 
+        incrSic:
+            mov vidaEne[11],0
+            mov opcionEne, 'd'
+            jmp regresarEne  
+    opciond:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[12]  
+        cmp al, 190
+        je incrSid
+
+        inc al
+        mov cordY[12],al
+
+        jmp regresarEne 
+        incrSid:
+            mov vidaEne[12],0
+            mov opcionEne, 'e'
+            jmp regresarEne 
+    opcione:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[13]  
+        cmp al, 190
+        je incrSie
+
+        inc al
+        mov cordY[13],al
+
+        jmp regresarEne 
+        incrSie:
+            mov vidaEne[13],0
+            mov opcionEne, 'f'
+            jmp regresarEne  
+    opcionf:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[14]  
+        cmp al, 190
+        je incrSif
+
+        inc al
+        mov cordY[14],al
+
+        jmp regresarEne 
+        incrSif:
+            mov vidaEne[14],0
+            mov opcionEne, 'g'
+            jmp regresarEne                      
+    opciong:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[15]  
+        cmp al, 190
+        je incrSig
+
+        inc al
+        mov cordY[15],al
+
+        jmp regresarEne 
+        incrSig:
+            mov vidaEne[15],0
+            mov opcionEne, 'h'
+            jmp regresarEne                 
+    opcionh:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[16]  
+        cmp al, 190
+        je incrSih
+
+        inc al
+        mov cordY[16],al
+
+        jmp regresarEne 
+        incrSih:
+            mov vidaEne[16],0
+            mov opcionEne, 'i'
+            jmp regresarEne 
+    opcioni:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[17]  
+        cmp al, 190
+        je incrSii
+
+        inc al
+        mov cordY[17],al
+
+        jmp regresarEne 
+        incrSii:
+            mov vidaEne[17],0
+            mov opcionEne, 'j'
+            jmp regresarEne 
+     opcionj:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[18]  
+        cmp al, 190
+        je incrSij
+
+        inc al
+        mov cordY[18],al
+
+        jmp regresarEne 
+        incrSij:
+            mov vidaEne[18],0
+            mov opcionEne, 'k'
+            jmp regresarEne 
+    opcionk:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[19]  
+        cmp al, 190
+        je incrSik
+
+        inc al
+        mov cordY[19],al
+
+        jmp regresarEne 
+        incrSik:
+            mov vidaEne[19],0
+            mov opcionEne, 'l'
+            jmp regresarEne   
+    opcionl:
+        dibujarEnemigo
+        lea dx, cordY 
+        mov al, cordY[20]  
+        cmp al, 190
+        je incrSil
+
+        inc al
+        mov cordY[20],al
+
+        jmp regresarEne 
+        incrSil:
+            mov vidaEne[20],0
+            mov opcionEne, 'm'
+            dibujarEnemigo
+            jmp regresarEne 
 
 
     cambiarEne:
         mov opcionEne, '1'
         jmp regresarEne 
     
-      
+    
+    pop bx
+    pop ax 
+    pop si 
 moverizq:
     push ax
     mov ax, xnave; movemos la posicion de la nave al registro ax
