@@ -437,7 +437,7 @@ dibujarnave macro
 endm
 
 dibujarEnemigo macro
-    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida
+    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1
   
     push si
     mov si, 0000
@@ -492,10 +492,71 @@ dibujarEnemigo macro
         auxdiblinea moustro8, 8
 
 
-
-
-
         pop si
+
+                ;;;;
+        mov ax,00000h
+        lea dx, cordY
+        mov al, cordY[si]  
+        cmp ax, ydis[0]
+        je ver1
+        inc al
+        cmp ydis[0],ax
+        je ver1
+        inc al
+        cmp ydis[0],ax
+        je ver1
+        inc al
+        cmp ydis[0],ax
+        je ver1
+        inc al
+        cmp ydis[0],ax
+        je ver1
+        jmp saltarVer1
+
+        ver1:
+            
+            mov ax, 00000h
+            lea dx, cordx
+            mov al, cordX[si] 
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida1
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida1
+            
+            jmp saltarVer1
+            quitarvida1:
+                ;lea dx, vidaEne 
+                mov vidaEne[si], 0
+                mov ydis, 0
+                mov xdis, 0
+                push si
+                jmp saltarVer1
+
+        saltarVer1:
+        ;;;;
+
+
+
         inc si
         jmp regreso
     enemigoNivel2: 
@@ -529,19 +590,78 @@ dibujarEnemigo macro
         add ax, 320
         auxdiblinea moustro28, 8
         pop si
+        ;;;;
+        mov ax,00000h
+        lea dx, cordY
+        mov al, cordY[si]  
+        cmp ax, ydis[0]
+        je ver2
+        inc al
+        cmp ydis[0],ax
+        je ver2
+        inc al
+        cmp ydis[0],ax
+        je ver2
+        inc al
+        cmp ydis[0],ax
+        je ver2
+        inc al
+        cmp ydis[0],ax
+        je ver2
+        jmp saltarVer2
+
+        ver2:
+            
+            mov ax, 00000h
+            lea dx, cordx
+            mov al, cordX[si] 
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida2
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida2
+            
+            jmp saltarVer2
+            quitarvida2:
+                ;lea dx, vidaEne 
+                mov vidaEne[si], 1
+                mov ydis, 0
+                mov xdis, 0
+                push si
+                jmp saltarVer2
+
+        saltarVer2:
+        ;;;;
         inc si
         jmp regreso
     enemigoNivel3: 
         push si
         lea dx, cordY
         mov al, cordY[si]
-        ;lea dx, cordX
-        ;mov bx, cordX[si]
-        ;mov ax, al;coordenada y de la nave
+
+
         lea dx, cordx
         mov bl, cordx[si]
         ;mov bx, xene ; coordenada x de la nave
-
+        
         mov cx, 320
         mul cx
         add ax, bx
@@ -562,40 +682,73 @@ dibujarEnemigo macro
         add ax, 320
         auxdiblinea moustro38, 8
 
+        pop si
         mov ax,00000h
         lea dx, cordY
-        mov al, cordY[0]  
+        mov al, cordY[si]  
         cmp ax, ydis[0]
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
         je ver
         jmp saltarVer
 
         ver:
+            
             mov ax, 00000h
             lea dx, cordx
-            mov al, cordX[0] 
+            mov al, cordX[si] 
+            cmp ax, xdis[0]
+            je quitarvida
             inc al
+            cmp ax, xdis[0]
+            je quitarvida
             inc al
+            cmp ax, xdis[0]
+            je quitarvida
             inc al
+            cmp ax, xdis[0]
+            je quitarvida
             inc al 
             cmp ax, xdis[0]
             je quitarvida
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida
+            inc al 
+            cmp ax, xdis[0]
+            je quitarvida
+            
             jmp saltarVer
             quitarvida:
                 ;lea dx, vidaEne 
-                mov vidaEne[0], 2
+                mov vidaEne[si], 2
                 mov ydis, 0
                 mov xdis, 0
+                push si
                 jmp saltarVer
 
         saltarVer:
-     
-        pop si
+       
+        
+        
         inc si
+        
         jmp regreso
     desaparecer: 
-        push si
        
-        pop si
         inc si
         jmp regreso
     
@@ -2028,15 +2181,22 @@ moverEne:
         jmp regresarEne 
     opcion1:
         dibujarEnemigo
+
+
         lea dx, cordY 
         mov al, cordY[0]  
         cmp al, 187
         je incrSi
 
+           
         inc al
         mov cordY[0],al
 
-
+        
+        lea dx, vidaEne 
+        mov al, vidaEne[0]  
+        cmp al, 00h
+        je incrSi
 
         jmp regresarEne 
         incrSi:
@@ -2045,6 +2205,7 @@ moverEne:
             jmp regresarEne
     opcion2:
         dibujarEnemigo
+        
         lea dx, cordY 
         mov al, cordY[1]  
         cmp al, 187
@@ -2052,6 +2213,11 @@ moverEne:
 
         inc al
         mov cordY[1],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[1]  
+        cmp al, 00h
+        je incrSi1
 
         jmp regresarEne 
         incrSi1:
@@ -2067,6 +2233,11 @@ moverEne:
 
         inc al
         mov cordY[2],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[2]  
+        cmp al, 00h
+        je incrSi2
 
         jmp regresarEne 
         incrSi2:
@@ -2084,6 +2255,11 @@ moverEne:
         inc al
         mov cordY[3],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[3]  
+        cmp al, 00h
+        je incrSi3
+
         jmp regresarEne 
         incrSi3:
             mov vidaEne[3],0
@@ -2098,6 +2274,11 @@ moverEne:
 
         inc al
         mov cordY[4],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[4]  
+        cmp al, 00h
+        je incrSi4
 
         jmp regresarEne 
         incrSi4:
@@ -2114,6 +2295,11 @@ moverEne:
         inc al
         mov cordY[5],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[5]  
+        cmp al, 00h
+        je incrSi5
+
         jmp regresarEne 
         incrSi5:
             mov vidaEne[5],0
@@ -2128,6 +2314,11 @@ moverEne:
 
         inc al
         mov cordY[6],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[6]  
+        cmp al, 00h
+        je incrSi6
 
         jmp regresarEne 
         incrSi6:
@@ -2144,6 +2335,12 @@ moverEne:
         inc al
         mov cordY[7],al
 
+
+        lea dx, vidaEne 
+        mov al, vidaEne[7]  
+        cmp al, 00h
+        je incrSi7
+
         jmp regresarEne 
         incrSi7:
             mov vidaEne[7],0
@@ -2158,6 +2355,12 @@ moverEne:
 
         inc al
         mov cordY[8],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[8]  
+        cmp al, 00h
+        je incrSi8
+
 
         jmp regresarEne 
         incrSi8:
@@ -2174,6 +2377,11 @@ moverEne:
         inc al
         mov cordY[9],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[9]  
+        cmp al, 00h
+        je incrSi9
+
         jmp regresarEne 
         incrSi9:
             mov vidaEne[9],0
@@ -2188,6 +2396,12 @@ moverEne:
 
         inc al
         mov cordY[10],al
+        
+        lea dx, vidaEne 
+        mov al, vidaEne[10]  
+        cmp al, 00h
+        je incrSib
+
 
         jmp regresarEne 
         incrSib:
@@ -2203,6 +2417,11 @@ moverEne:
 
         inc al
         mov cordY[11],al
+        
+        lea dx, vidaEne 
+        mov al, vidaEne[11]  
+        cmp al, 00h
+        je incrSic
 
         jmp regresarEne 
         incrSic:
@@ -2219,6 +2438,11 @@ moverEne:
         inc al
         mov cordY[12],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[12]  
+        cmp al, 00h
+        je incrSid
+
         jmp regresarEne 
         incrSid:
             mov vidaEne[12],0
@@ -2233,6 +2457,11 @@ moverEne:
 
         inc al
         mov cordY[13],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[13]  
+        cmp al, 00h
+        je incrSie
 
         jmp regresarEne 
         incrSie:
@@ -2249,6 +2478,11 @@ moverEne:
         inc al
         mov cordY[14],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[14]  
+        cmp al, 00h
+        je incrSif
+
         jmp regresarEne 
         incrSif:
             mov vidaEne[14],0
@@ -2263,6 +2497,11 @@ moverEne:
 
         inc al
         mov cordY[15],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[15]  
+        cmp al, 00h
+        je incrSig
 
         jmp regresarEne 
         incrSig:
@@ -2279,6 +2518,11 @@ moverEne:
         inc al
         mov cordY[16],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[16]  
+        cmp al, 00h
+        je incrSih
+
         jmp regresarEne 
         incrSih:
             mov vidaEne[16],0
@@ -2293,6 +2537,11 @@ moverEne:
 
         inc al
         mov cordY[17],al
+
+        lea dx, vidaEne 
+        mov al, vidaEne[17]  
+        cmp al, 00h
+        je incrSi
 
         jmp regresarEne 
         incrSii:
@@ -2309,6 +2558,11 @@ moverEne:
         inc al
         mov cordY[18],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[18]  
+        cmp al, 00h
+        je incrSi
+
         jmp regresarEne 
         incrSij:
             mov vidaEne[18],0
@@ -2324,6 +2578,12 @@ moverEne:
         inc al
         mov cordY[19],al
 
+        lea dx, vidaEne 
+        mov al, vidaEne[19]  
+        cmp al, 00h
+        je incrSik
+
+
         jmp regresarEne 
         incrSik:
             mov vidaEne[19],0
@@ -2338,6 +2598,10 @@ moverEne:
 
         inc al
         mov cordY[20],al
+        lea dx, vidaEne 
+        mov al, vidaEne[20]  
+        cmp al, 00h
+        je incrSil
 
         jmp regresarEne 
         incrSil:
