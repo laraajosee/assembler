@@ -39,6 +39,8 @@
     tamus       dw  0
     tampass     dw  0 
     lockedTemp  dw  0
+
+    livescount db 3
     
     usuarios    db  'proyecto', 92, 'users.txt', 0
     auxcontenidoar db   1 dup('$')
@@ -54,6 +56,8 @@
     tempDelay dw 1000
     unidades db 9
     decenas db 2  
+
+
     
     cabeza db "        Universidad San Carlos De Guatemala ",10,13
     db "        Facultad De Ingeneria ", 10, 13
@@ -178,6 +182,7 @@
 
     lvl db '      1','$'
     time db '00:00','$'
+    punteoWor db 10, 13,'Punteo:', 10, 13, '$'
 
        ;tiempo
     minutos         db  0
@@ -189,7 +194,13 @@
     micsegundos     db  0
 
     contadorEne db 0
-    
+
+    unidadesCont db 0
+    decenasCont db 0
+    contKami db 0
+    contadorPausa db 0
+
+    spaceEmpezar  db 'Space to', 10, 13,'Start', 10, 13, 'lvl 1','$'
 
 .code
 GetChar proc
@@ -198,6 +209,40 @@ GetChar proc
     int 16h
     ret
 GetChar endp
+
+sumarContador macro
+    local decunidadesCont, decdecenasCont, salirDeAqui
+        mov al, unidadesCont
+        cmp al, 09h
+        je decdecenasCont
+        decunidadesCont: 
+               
+               
+               ;sumo 1 unidadad
+               mov al, unidadesCont
+               inc al 
+               mov unidadesCont, al  
+               ;imprimo decenasCont
+               
+                jmp salirDeAqui 
+               
+         decdecenasCont: 
+               mov al, unidadesCont
+               cmp al, 00h
+
+                
+               ;simo 1 decenasCont
+               mov al, decenasCont
+               inc al 
+               mov decenasCont, al 
+               
+               ;unidadesCont en 9
+               mov unidadesCont, 00h 
+                
+
+        salirDeAqui:
+endm
+
 
 imprimirtiempo macro
     local e1
@@ -218,8 +263,8 @@ imprimirtiempo macro
         ;int 10h
         mov ah, 02h
         mov bh, 00h
-        mov dh, 10
-        mov dl, 0
+        mov dh, 10 ; fila 
+        mov dl, 0 ; columna
         int 10h
 
         mov ah, 09h
@@ -338,21 +383,46 @@ imprimirnombre macro
         mov ah, 09h
         int 21h
 
+        mov al,livescount
+        mov dl, al
+        add dl, 30h
+        mov ah,02h
+        int 21h
+
+        
+        mov dx, offset punteoWor
+        mov ah, 09h
+        int 21h
+
+    ;imprimo decenasCont
+        mov al,decenasCont
+        mov dl, al
+        add dl, 30h
+        mov ah,02h
+        int 21h
+                        
+               ;imprimo unidadesCont
+        mov al, unidadesCont  
+        mov dl, al
+        add dl, 30h
+        mov ah,02h
+        int 21h  
+
         mov ah, 02h
         mov bh, 00h
         mov dh, 17
         mov dl, 0
         int 10h
 
-        mov ax, opcionEne
-        cmp al, '0'
-        je spacee
-        jmp e2
+        ;mov ax, opcionEne
+        ;cmp al, '0'
+        ;je spacee
+        ;jmp e2
 
-        spacee:
-            mov dx, offset pressSpace
-            mov ah, 09h
-            int 21h
+        ;spacee:
+         ;   mov dx, offset pressSpace
+          ;  mov ah, 09h
+           ; int 21h
 
         
 
@@ -437,7 +507,7 @@ dibujarnave macro
 endm
 
 dibujarEnemigo macro
-    local imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1
+    local matar1,matar2, matar3, imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1, bajar, regresoBajar
   
     push si
     mov si, 0000
@@ -447,6 +517,8 @@ dibujarEnemigo macro
     mov ax, 0000
     cmp si, 21
     je salirr
+
+
     lea dx, vidaEne 
     mov al, vidaEne[si]  
     cmp al, 01h
@@ -457,6 +529,7 @@ dibujarEnemigo macro
     je enemigoNivel3
     cmp al, 00h
     je desaparecer
+
     
     
        
@@ -493,7 +566,11 @@ dibujarEnemigo macro
 
 
         pop si
-
+        lea dx, cordY 
+        mov al, cordY[si]  
+        cmp al, 187
+        je matar1
+  
                 ;;;;
         mov ax,00000h
         lea dx, cordY
@@ -546,15 +623,24 @@ dibujarEnemigo macro
             jmp saltarVer1
             quitarvida1:
                 ;lea dx, vidaEne 
-                mov vidaEne[si], 0
+                mov vidaEne[si], 00h
                 mov ydis, 0
                 mov xdis, 0
                 push si
+                sumarContador
                 jmp saltarVer1
-
+            matar1: 
+                mov vidaEne[si], 00h
+                push si
+                jmp saltarVer1
         saltarVer1:
-        ;;;;
 
+
+
+
+         mov al, contKami[0]
+         cmp al, 01h
+         je bajar
 
 
         inc si
@@ -590,6 +676,14 @@ dibujarEnemigo macro
         add ax, 320
         auxdiblinea moustro28, 8
         pop si
+
+
+        lea dx, cordY 
+        mov al, cordY[si]  
+        cmp al, 187
+        je matar2
+
+
         ;;;;
         mov ax,00000h
         lea dx, cordY
@@ -646,10 +740,19 @@ dibujarEnemigo macro
                 mov ydis, 0
                 mov xdis, 0
                 push si
+                sumarContador
                 jmp saltarVer2
-
+            matar2: 
+                mov vidaEne[si], 00h
+                push si
+                jmp saltarVer1
         saltarVer2:
         ;;;;
+
+        mov al, contKami[0]
+        cmp al, 01h
+        je bajar
+
         inc si
         jmp regreso
     enemigoNivel3: 
@@ -657,10 +760,9 @@ dibujarEnemigo macro
         lea dx, cordY
         mov al, cordY[si]
 
-
         lea dx, cordx
         mov bl, cordx[si]
-        ;mov bx, xene ; coordenada x de la nave
+      
         
         mov cx, 320
         mul cx
@@ -683,6 +785,13 @@ dibujarEnemigo macro
         auxdiblinea moustro38, 8
 
         pop si
+
+        lea dx, cordY 
+        mov al, cordY[si]  
+        cmp al, 187
+        je matar3
+
+
         mov ax,00000h
         lea dx, cordY
         mov al, cordY[si]  
@@ -738,11 +847,17 @@ dibujarEnemigo macro
                 mov ydis, 0
                 mov xdis, 0
                 push si
+                sumarContador
                 jmp saltarVer
-
+            matar3: 
+                mov vidaEne[si], 00h
+                push si
+                jmp saltarVer1
         saltarVer:
        
-        
+        mov al, contKami[0]
+        cmp al, 01h
+        je bajar
         
         inc si
         
@@ -752,7 +867,19 @@ dibujarEnemigo macro
         inc si
         jmp regreso
     
-    
+    bajar:
+        lea dx, cordY
+        mov al, cordY[20]  
+        cmp ax, 190
+        je regresoBajar
+        mov al, cordY[si] 
+        inc al
+        mov cordY[si], al
+        
+       
+    regresoBajar:
+        inc si
+        jmp regreso
     salirr:
     pop si
    
@@ -2007,6 +2134,7 @@ log:
 
     juego:
     xor si, si
+   
     ;entra en modo grafico
     ;ah = 0
     ;al = 13h
@@ -2078,6 +2206,13 @@ inicioj:
     
     call VSync
     call Delay; jugar con los valores del delay para que no titile tanto la pantalla
+
+      ;control pausa!
+    ;mov ax, 0000h
+    mov al, contadorPausa[0]
+    cmp al, 00h
+    je pausa
+
     call HasKey;este procedimiento verifica que se haya pulsado una tecla, si no regresa al inicio del juego a repintar la pantalla
     jz inicioj
     call GetChar;verifica la tecla que pulso
@@ -2091,6 +2226,13 @@ inicioj:
     je moverder
     cmp al, 1Bh;escB
     je pausa
+    cmp al, 6BH
+    je ka
+    
+  
+     
+
+
     jmp inicioj;vuelve al inicio del juevo para repintar la pantalla
 disparar:
     cmp ydis, 0;verifica que no haya disparo
@@ -2173,6 +2315,8 @@ moverEne:
     je opcionk
     cmp al, 'l'
     je opcionl
+    cmp al, 'z'
+    je opcionz
 
 
     opcion0:
@@ -2609,11 +2753,23 @@ moverEne:
             mov opcionEne, 'm'
             dibujarEnemigo
             jmp regresarEne 
+    opcionz:
+        lea dx, cordY 
+        mov al, cordY[20]  
+        cmp al, 187
+        je salir
+        
+      
 
+        
 
     cambiarEne:
         mov opcionEne, '1'
         jmp regresarEne 
+    kamikaze:
+        mov opcionEne, 'z'
+
+        jmp regresarEne
     saliAqui:
     
         dibujarEnemigo
@@ -2652,27 +2808,58 @@ imprimirf1:
 imprimirf2:
     imprimir l3
 pausa:
-    mov ah, 02h
-    mov bh, 00h
-    mov dh, 17
-    mov dl, 0
-    int 10h
+  
+    mov al, contadorPausa[0]
+    cmp al, 00h
+    je pausa0
+     cmp al, 01h
+    je pausa0
 
-    mov dx, offset pressSpace
-    mov ah, 09h
-    int 21h
-    mov dx, offset pressEsc
-    mov ah, 09h
-    int 21h
-       
-           
-    call GetChar;verifica la tecla que pulso
-    cmp al, 20h;tecla de espacio
-    je inicioj
-    cmp al, 1Bh;escB
-    je pausa
-    jmp pausa;vuelve al inicio del juevo para repintar la pantalla  
+    pausa0:
+          
+            mov ah, 02h
+            mov bh, 00h
+            mov dh, 18
+            mov dl, 0
+            int 10h
 
+            mov dx, offset spaceEmpezar
+            mov ah, 09h
+            int 21h
+
+            call GetChar;verifica la tecla que pulso
+            cmp al, 20h;tecla de espacio
+            je empezarJuego
+            jne pausa0
+            
+            empezarJuego:
+            mov contadorPausa, 01h
+            jmp inicioj
+    pausa1:
+            mov ah, 02h
+            mov bh, 00h
+            mov dh, 17
+            mov dl, 0
+            int 10h
+
+            mov dx, offset pressSpace
+            mov ah, 09h
+            int 21h
+            mov dx, offset pressEsc
+            mov ah, 09h
+            int 21h
+            
+                
+            call GetChar;verifica la tecla que pulso
+            cmp al, 20h;tecla de espacio
+            je inicioj
+            cmp al, 1Bh;escB
+            je pausa
+            jmp pausa;vuelve al inicio del juevo para repintar la pantalla  
+
+    ka:   
+      mov contKami, 01h
+      jmp inicioj
 
 main endp
 end main
