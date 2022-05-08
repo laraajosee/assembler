@@ -55,7 +55,9 @@
 
     tempDelay dw 1000
     unidades db 9
-    decenas db 2  
+    decenas db 2 
+
+    nullEne db 0 
 
 
     
@@ -106,11 +108,18 @@
 
         ;nave
     naveFila1       db  00, 00, 00, 00, 00, 39, 00, 00, 00, 00, 00
-    naveFila2       db  00, 00, 00, 00, 00, 15, 00, 00, 00, 00, 00
-    naveFila3       db  00, 00, 39, 00, 15, 11, 15, 00, 39,	00, 00
-    naveFila4       db  00, 15, 15, 15, 15, 11, 15, 15, 15, 15, 00
-    naveFila5       db  15, 15, 15, 15, 15,	11,	15,	15,	15,	15,	15
-    naveFila6       db  15, 15, 15, 15, 15,	11,	15,	15,	15,	15,	15
+    naveFila2       db  00, 00, 00, 00, 00, 39, 00, 00, 00, 00, 00
+    naveFila3       db  00, 00, 00, 00, 15, 39, 15, 00, 00,	00, 00
+    naveFila4       db  00, 15, 15, 15, 15, 39, 15, 15, 15, 15, 00
+    naveFila5       db  15, 15, 15, 15, 15,	39,	15,	15,	15,	15,	15
+    naveFila6       db  15, 15, 15, 15, 15,	39,	15,	15,	15,	15,	15
+
+    naveFila21       db  00, 00, 00, 00, 00, 10, 00, 00, 00, 10, 00
+    naveFila22       db  00, 00, 00, 00, 00, 39, 00, 00, 00, 39, 00
+    naveFila23       db  00, 00, 00, 00, 15, 39, 15, 00, 00, 39, 00
+    naveFila24       db  00, 15, 15, 15, 15, 39, 15, 15, 15, 39, 00
+    naveFila25       db  15, 15, 15, 15, 15, 39, 15, 15, 15, 39, 15
+    naveFila26       db  15, 15, 15, 15, 15, 39, 15,15,	15,	15,	15
         ;disparo
         ;moustro
     moustro21        db  00, 10, 00, 00, 00, 10, 00, 00 
@@ -155,12 +164,14 @@
     holimoustro     dw 0
 
     movMoustro      dw  0
+    movMoustro2     dw 0
 
     xene            dw  0
     yene            dw  0
     xene1            dw  0
     yene1            dw  0
     opcionEne       dw  '0','$'
+    opcionEne2       dw  '0','$'
 
     l1              db  'EJEMPLO 5', 10, 13, '$'
     l2              db  'SE PULSO F1', 10, 13, '$'
@@ -175,12 +186,16 @@
     pressSpace db  10, 13,10, 13,'Space!', 10, 13, 'To start', '$'
     pressEsc db  10, 13,10, 13,'Esc', 10, 13, 'To Menu', '$'
     vidaEne db 3,3,3,3,3,3,3,2,2,2,2,2,2,2,1,1,1,1,1,1,1
-
     cordX db 75,105,135,165,195,225,250,75,105,135,165,195,225,250,75,105,135,165,195,225,250
     cordY db 41,41,41,41,41,41,41,32,32,32,32,32,32,32,23,23,23,23,23,23,23
+
+    vidaEne2 db 3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1                     ;1
+    cordX2 db 75,90,105,120,135,150,165,175,185,200,215,230,245,255,75,90,105,120,135,150,165,175,185,200,215,230,245,255,75,90,105,120,135,150,165,175,185,200,215,230,245,255
+    cordY2 db 41,41,41,41,41,41,41,41,41,41,41,41,41,41,33,33,33,33,33,33,33,33,33,33,33,33,33,33,23,23,23,23,23,23,23,23,23,23,23,23,23,23
     
 
     lvl db '      1','$'
+    lv2 db '      2',10, 13,'$'
     time db '00:00','$'
     punteoWor db 10, 13,'Punteo:', 10, 13, '$'
 
@@ -201,6 +216,9 @@
     contadorPausa db 0
 
     spaceEmpezar  db 'Space to', 10, 13,'Start', 10, 13, 'lvl 1','$'
+    spaceEmpezar2 db 'Space to', 10, 13,'Start', 10, 13, 'lvl 2','$'
+
+    controlNivel db 0
 
 .code
 GetChar proc
@@ -343,7 +361,7 @@ endm
 
 
 imprimirnombre macro
-    local e1, e2
+    local e1, e2, lvl1, lvl2, saliraqui
     ;mov dl, 0
     e1:
 
@@ -367,9 +385,21 @@ imprimirnombre macro
         mov ah, 09h
         int 21h
 
-        mov dx, offset lvl
-        mov ah, 09h
-        int 21h
+        mov al, controlNivel[0]
+        cmp al, 00h
+        je lvl1
+        cmp al, 01h
+        je lvl2
+        lvl1:
+            mov dx, offset lvl
+            mov ah, 09h
+            int 21h
+            jmp saliraqui
+        lvl2:
+            mov dx, offset lv2
+            mov ah, 09h
+            int 21h
+        saliraqui:
 
         mov dx, offset timeWord
         mov ah, 09h
@@ -489,25 +519,59 @@ limpiarpantallag proc
 limpiarpantallag endp
 
 dibujarnave macro
-    mov cx, 320
-    mul cx
-    add ax, bx
-    mov di, ax
-    auxdiblinea naveFila1, 11
-    add ax, 320
-    auxdiblinea naveFila2, 11
-    add ax, 320
-    auxdiblinea naveFila3, 11
-    add ax, 320
-    auxdiblinea naveFila4, 11
-    add ax, 320
-    auxdiblinea naveFila5, 11
-    add ax, 320
-    auxdiblinea naveFila6, 11
+    local nave1, nave2, salirNave
+    push ax
+    push bx
+    mov al, controlNivel[0]
+    cmp al, 00h
+    je nave1
+    cmp al, 01h
+    je nave2
+
+    nave1:
+        pop bx
+        pop ax
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea naveFila1, 11
+        add ax, 320
+        auxdiblinea naveFila2, 11
+        add ax, 320
+        auxdiblinea naveFila3, 11
+        add ax, 320
+        auxdiblinea naveFila4, 11
+        add ax, 320
+        auxdiblinea naveFila5, 11
+        add ax, 320
+        auxdiblinea naveFila6, 11
+        jmp salirNave
+
+    nave2:
+        pop bx
+        pop ax
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea naveFila21, 11
+        add ax, 320
+        auxdiblinea naveFila22, 11
+        add ax, 320
+        auxdiblinea naveFila23, 11
+        add ax, 320
+        auxdiblinea naveFila24, 11
+        add ax, 320
+        auxdiblinea naveFila25, 11
+        add ax, 320
+        auxdiblinea naveFila26, 11
+
+    salirNave:
 endm
 
 dibujarEnemigo macro
-    local matar1,matar2, matar3, imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1, bajar, regresoBajar
+    local salirBajar, matar1,matar2, matar3, imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1, bajar, regresoBajar
   
     push si
     mov si, 0000
@@ -518,6 +582,9 @@ dibujarEnemigo macro
     cmp si, 21
     je salirr
 
+    mov al, nullEne
+    cmp al, 01h
+    je salirr
 
     lea dx, vidaEne 
     mov al, vidaEne[si]  
@@ -529,6 +596,7 @@ dibujarEnemigo macro
     je enemigoNivel3
     cmp al, 00h
     je desaparecer
+
 
     
     
@@ -870,21 +938,153 @@ dibujarEnemigo macro
     bajar:
         lea dx, cordY
         mov al, cordY[20]  
-        cmp ax, 190
-        je regresoBajar
+        cmp ax, 186
+        je salirBajar
         mov al, cordY[si] 
         inc al
         mov cordY[si], al
-        
-       
+
     regresoBajar:
         inc si
         jmp regreso
+    salirBajar:
+     mov  controlNivel, 01h  
+     mov contadorPausa, 02h 
+     mov nullEne, 01h
+     dibujarEnemigo2
     salirr:
     pop si
-   
+    
 endm
+;enemigo 2
+dibujarEnemigo2 macro
+ local salirBajar, matar1,matar2, matar3, imprimirEnemigos, regreso, salirr,enemigoNivel1,enemigoNivel2,enemigoNivel3, desaparecer,saltarVer, ver, quitarvida,ver2, quitarvida2,saltarVer2,ver1, quitarvida1,saltarVer1, bajar, regresoBajar
+    
+    push si
+    mov si, 0000
 
+    regreso:
+    mov cx,0000
+    mov ax, 0000
+    cmp si, 42
+    je salirr
+
+    lea dx, vidaEne2 
+    mov al, vidaEne2[si]  
+    cmp al, 01h
+    je enemigoNivel1
+    cmp al, 02h
+    je enemigoNivel2
+    cmp al, 03h
+    je enemigoNivel3
+
+    inc si 
+    jmp regreso
+       
+    enemigoNivel1: 
+        push si
+        lea dx, cordY2
+        mov al, cordY2[si]
+
+        lea dx, cordx2
+        mov bl, cordx2[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro1, 8
+        add ax, 320
+        auxdiblinea moustro2, 8
+        add ax, 320
+        auxdiblinea moustro3, 8
+        add ax, 320
+        auxdiblinea moustro4, 8
+        add ax, 320
+        auxdiblinea moustro5, 8
+        add ax, 320
+        auxdiblinea moustro6, 8
+        add ax, 320
+        auxdiblinea moustro7, 8
+        add ax, 320
+        auxdiblinea moustro8, 8
+
+        pop si
+        inc si
+        jmp regreso
+
+     enemigoNivel2: 
+        push si
+        lea dx, cordY2
+        mov al, cordY2[si]
+
+        lea dx, cordx2
+        mov bl, cordx2[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro21, 8
+        add ax, 320
+        auxdiblinea moustro22, 8
+        add ax, 320
+        auxdiblinea moustro23, 8
+        add ax, 320
+        auxdiblinea moustro24, 8
+        add ax, 320
+        auxdiblinea moustro25, 8
+        add ax, 320
+        auxdiblinea moustro26, 8
+        add ax, 320
+        auxdiblinea moustro27, 8
+        add ax, 320
+        auxdiblinea moustro28, 8
+
+        pop si
+        inc si
+        jmp regreso
+
+     enemigoNivel3: 
+        push si
+        lea dx, cordY2
+        mov al, cordY2[si]
+
+        lea dx, cordx2
+        mov bl, cordx2[si]
+        ;mov bx, xene ; coordenada x de la nave
+
+        mov cx, 320
+        mul cx
+        add ax, bx
+        mov di, ax
+        auxdiblinea moustro31, 8
+        add ax, 320
+        auxdiblinea moustro32, 8
+        add ax, 320
+        auxdiblinea moustro33, 8
+        add ax, 320
+        auxdiblinea moustro34, 8
+        add ax, 320
+        auxdiblinea moustro35, 8
+        add ax, 320
+        auxdiblinea moustro36, 8
+        add ax, 320
+        auxdiblinea moustro37, 8
+        add ax, 320
+        auxdiblinea moustro38, 8
+
+        pop si
+        inc si
+        jmp regreso
+
+    
+    salirr:
+    pop si
+    
+endm
 VSync proc
 ;metodo de sincronizacion vertical de la pantalla
     mov dx, 03dah
@@ -1087,8 +1287,7 @@ dibujarmarco macro
         auxdiblinea lineamarco, 20
         add ax, 20
         auxdiblinea lineamarco, 20
-
-        
+    
     
 endm
 limpiarp macro
@@ -2192,7 +2391,13 @@ inicioj:
     mov ax, ynave ;coordenada y de la nave
     mov bx, xnave ; coordenada x de la nave
     dibujarnave
-    jmp moverEne
+    
+    mov al, controlNivel[0]
+    cmp al, 00h
+    je moverEne
+    ;jmp moverEne
+    cmp al, 01h
+    je moverEne2
     regresarEne:
    
     mov ax, ydis ; coordenada y del disparo
@@ -2207,10 +2412,12 @@ inicioj:
     call VSync
     call Delay; jugar con los valores del delay para que no titile tanto la pantalla
 
-      ;control pausa!
-    ;mov ax, 0000h
+    ;control pausa!
+    mov ax, 0000
     mov al, contadorPausa[0]
     cmp al, 00h
+    je pausa
+    cmp al, 02h
     je pausa
 
     call HasKey;este procedimiento verifica que se haya pulsado una tecla, si no regresa al inicio del juego a repintar la pantalla
@@ -2220,6 +2427,8 @@ inicioj:
     je cambiarEne
     cmp ax, 4800h;v minuscula para disparar
     je disparar
+    cmp al, 76h;v minuscula para disparar
+    je disparar2
     cmp ax, 4b00h;flecha de la izquierda
     je moverizq
     cmp ax, 4d00h;flecha de la derecha
@@ -2229,9 +2438,6 @@ inicioj:
     cmp al, 6BH
     je ka
     
-  
-     
-
 
     jmp inicioj;vuelve al inicio del juevo para repintar la pantalla
 disparar:
@@ -2257,7 +2463,25 @@ disparar1:
     pop bx
     pop ax
     jmp inicioj
-moverEne:
+disparar2:
+    push ax
+    push bx
+    ;limpia los valores de ax y bx
+    xor ax, ax
+    xor bx, bx
+    mov ax, xnave
+    add ax, 9h
+    mov xdis, ax; usamos la coordenada de x de la nave y se le suman 5 para correrlo 5 pixeles
+    mov ax, ynave
+    sub ax, 5
+    mov ydis, ax; usamos la coordenada y de la nave y se le restan 5 para que este 5 pixeles arriba 
+    mov ax, ydis
+    mov bx, xdis
+    dibujardis
+    pop bx
+    pop ax
+    jmp inicioj
+moverEne: ;;nivel1
 ;guarda los valores de ax y bx en la pila
     push ax
     push bx
@@ -2759,7 +2983,6 @@ moverEne:
         cmp al, 187
         je salir
         
-      
 
         
 
@@ -2777,6 +3000,927 @@ moverEne:
     pop bx
     pop ax 
     pop si 
+    ;;;nivel 2 enemigos ----------------*------------------
+moverEne2:
+;guarda los valores de ax y bx en la pila
+    push ax
+    push bx
+    push si
+
+      
+    ;inc movMoustro2
+    ;mov ax, movMoustro2
+    ;cmp al, 2
+    ;jne saliAqui2
+   
+    mov movMoustro2, 0
+
+    mov ax, opcionEne2
+    cmp al, '0'
+    je opcion20
+    cmp al, '1'
+    je opcion21
+    cmp al, '2'
+    je opcion22
+    cmp al, '3'
+    je opcion23
+    cmp al, '4'
+    je opcion24
+    cmp al, '5'
+    je opcion25
+    cmp al, '6'
+    je opcion26
+    cmp al, '7'
+    je opcion27
+    cmp al, '8'
+    je opcion28
+    cmp al, '9'
+    je opcion29
+    cmp al, 'a'
+    je opcion2a
+    cmp al, 'b'
+    je opcion2b
+    cmp al, 'c'
+    je opcion2c
+    cmp al, 'd'
+    je opcion2d
+    cmp al, 'e'
+    je opcion2e
+    cmp al, 'f'
+    je opcion2f
+    cmp al, 'g'
+    je opcion2g
+    cmp al, 'h'
+    je opcion2h
+    cmp al, 'i'
+    je opcion2i
+    cmp al, 'j'
+    je opcion2j
+    cmp al, 'k'
+    je opcion2k
+    cmp al, 'l'
+    je opcion2l
+    cmp al, 'm'
+    je opcion2m
+    cmp al, 'n'
+    je opcion2n
+    cmp al, 'o'
+    je opcion2o
+    cmp al, 'p'
+    je opcion2p
+    cmp al, 'q'
+    je opcion2q
+    cmp al, 'r'
+    je opcion2r
+    cmp al, 's'
+    je opcion2s
+    cmp al, 't'
+    je opcion2t
+    cmp al, 'u'
+    je opcion2u
+    cmp al, 'v'
+    je opcion2v
+    cmp al, 'w'
+    je opcion2w
+    cmp al, 'y'
+    je opcion2y
+    cmp al, 01h
+    je opcionaa
+    cmp al, 02h
+    je opcionab
+  
+
+    
+    opcion20: 
+        dibujarEnemigo2
+        jmp regresarEne  
+    opcion21:
+        dibujarEnemigo2
+
+
+        lea dx, cordY2 
+        mov al, cordY2[0]  
+        cmp al, 187
+        je incrSi21
+
+           
+        inc al
+        mov cordY2[0],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[0]
+        cmp al, 00h
+        je incrSi2
+
+        jmp regresarEne 
+        incrSi21:
+            mov vidaEne2[0],0
+            mov opcionEne2, '2'
+            jmp regresarEne
+
+    opcion22:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[1]  
+        cmp al, 187
+        je incrSi22
+
+           
+        inc al
+        mov cordY2[1],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[1]
+        cmp al, 00h
+        je incrSi22
+
+        jmp regresarEne 
+        incrSi22:
+            mov vidaEne2[1],0
+            mov opcionEne2, '3'
+            jmp regresarEne
+     opcion23:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[2]  
+        cmp al, 187
+        je incrSi23
+
+           
+        inc al
+        mov cordY2[2],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[2]
+        cmp al, 00h
+        je incrSi23
+
+        jmp regresarEne 
+        incrSi23:
+            mov vidaEne2[2],0
+            mov opcionEne2, '4'
+            jmp regresarEne
+    opcion24:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[3]  
+        cmp al, 187
+        je incrSi24
+
+           
+        inc al
+        mov cordY2[3],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[3]
+        cmp al, 00h
+        je incrSi24
+
+        jmp regresarEne 
+        incrSi24:
+            mov vidaEne2[3],0
+            mov opcionEne2, '5'
+            jmp regresarEne
+    opcion25:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[4]  
+        cmp al, 187
+        je incrSi25
+
+           
+        inc al
+        mov cordY2[4],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[4]
+        cmp al, 00h
+        je incrSi25
+
+        jmp regresarEne 
+        incrSi25:
+            mov vidaEne2[4],0
+            mov opcionEne2, '6'
+            jmp regresarEne
+    opcion26:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[5]  
+        cmp al, 187
+        je incrSi26
+
+           
+        inc al
+        mov cordY2[5],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[5]
+        cmp al, 00h
+        je incrSi26
+
+        jmp regresarEne 
+        incrSi26:
+            mov vidaEne2[5],0
+            mov opcionEne2, '7'
+            jmp regresarEne
+    opcion27:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[6]  
+        cmp al, 187
+        je incrSi27
+
+           
+        inc al
+        mov cordY2[6],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[6]
+        cmp al, 00h
+        je incrSi27
+
+        jmp regresarEne 
+        incrSi27:
+            mov vidaEne2[6],0
+            mov opcionEne2, '8'
+            jmp regresarEne
+    opcion28:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[7]  
+        cmp al, 187
+        je incrSi28
+
+           
+        inc al
+        mov cordY2[7],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[7]
+        cmp al, 00h
+        je incrSi28
+
+        jmp regresarEne 
+        incrSi28:
+            mov vidaEne2[7],0
+            mov opcionEne2, '9'
+            jmp regresarEne
+    opcion29:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[8]  
+        cmp al, 187
+        je incrSi29
+
+           
+        inc al
+        mov cordY2[8],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[8]
+        cmp al, 00h
+        je incrSi29
+
+        jmp regresarEne 
+        incrSi29:
+            mov vidaEne2[8],0
+            mov opcionEne2, 'a'
+            jmp regresarEne
+    opcion2a:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[9]  
+        cmp al, 187
+        je incrSi2a
+
+           
+        inc al
+        mov cordY2[9],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[9]
+        cmp al, 00h
+        je incrSi2a
+
+        jmp regresarEne 
+        incrSi2a:
+            mov vidaEne2[9],0
+            mov opcionEne2, 'b'
+            jmp regresarEne
+    opcion2b:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[10]  
+        cmp al, 187
+        je incrSi2b
+
+           
+        inc al
+        mov cordY2[10],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[10]
+        cmp al, 00h
+        je incrSi2b
+
+        jmp regresarEne 
+        incrSi2b:
+            mov vidaEne2[10],0
+            mov opcionEne2, 'c'
+            jmp regresarEne
+    opcion2c:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[11]  
+        cmp al, 187
+        je incrSi2c
+
+           
+        inc al
+        mov cordY2[11],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[11]
+        cmp al, 00h
+        je incrSi2c
+
+        jmp regresarEne 
+        incrSi2c:
+            mov vidaEne2[11],0
+            mov opcionEne2, 'd'
+            jmp regresarEne
+    opcion2d:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[12]  
+        cmp al, 187
+        je incrSi2d
+
+           
+        inc al
+        mov cordY2[12],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[12]
+        cmp al, 00h
+        je incrSi2d
+
+        jmp regresarEne 
+        incrSi2d:
+            mov vidaEne2[12],0
+            mov opcionEne2, 'e'
+            jmp regresarEne
+   opcion2e:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[13]  
+        cmp al, 187
+        je incrSi2e
+
+           
+        inc al
+        mov cordY2[13],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[13]
+        cmp al, 00h
+        je incrSi2e
+
+        jmp regresarEne 
+        incrSi2e:
+            mov vidaEne2[13],0
+            mov opcionEne2, 'f'
+            jmp regresarEne
+ opcion2f:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[14]  
+        cmp al, 187
+        je incrSi2f
+
+           
+        inc al
+        mov cordY2[14],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[14]
+        cmp al, 00h
+        je incrSi2f
+
+        jmp regresarEne 
+        incrSi2f:
+            mov vidaEne2[14],0
+            mov opcionEne2, 'g'
+            jmp regresarEne
+   opcion2g:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[15]  
+        cmp al, 187
+        je incrSi2g
+
+           
+        inc al
+        mov cordY2[15],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[15]
+        cmp al, 00h
+        je incrSi2g
+
+        jmp regresarEne 
+        incrSi2g:
+            mov vidaEne2[15],0
+            mov opcionEne2, 'h'
+            jmp regresarEne
+    
+   opcion2h:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[17]  
+        cmp al, 187
+        je incrSi2h
+
+           
+        inc al
+        mov cordY2[17],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[17]
+        cmp al, 00h
+        je incrSi2h
+
+        jmp regresarEne 
+        incrSi2h:
+            mov vidaEne2[17],0
+            mov opcionEne2, 'i'
+            jmp regresarEne
+   opcion2i:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[16]  
+        cmp al, 187
+        je incrSi2i
+
+           
+        inc al
+        mov cordY2[16],al
+        
+        
+        lea dx, vidaEne2 
+        mov al, vidaEne2[16]
+        cmp al, 00h
+        je incrSi2i
+
+        jmp regresarEne 
+        incrSi2i:
+            mov vidaEne2[16],0
+            mov opcionEne2, 'j'
+            jmp regresarEne
+   opcion2j:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[17]  
+        cmp al, 187
+        je incrSi2j
+
+           
+        inc al
+        mov cordY2[17],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[17]
+        cmp al, 00h
+        je incrSi2j
+
+        jmp regresarEne 
+        incrSi2j:
+            mov vidaEne2[17],0
+            mov opcionEne2, 'k'
+            jmp regresarEne
+    opcion2k:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[18]  
+        cmp al, 187
+        je incrSi2k
+
+           
+        inc al
+        mov cordY2[18],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[18]
+        cmp al, 00h
+        je incrSi2k
+
+        jmp regresarEne 
+        incrSi2k:
+            mov vidaEne2[18],0
+            mov opcionEne2, 'l'
+            jmp regresarEne
+   opcion2l:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[19]  
+        cmp al, 187
+        je incrSi2l
+
+           
+        inc al
+        mov cordY2[19],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[19]
+        cmp al, 00h
+        je incrSi2l
+
+        jmp regresarEne 
+        incrSi2l:
+            mov vidaEne2[19],0
+            mov opcionEne2, 'm'
+            jmp regresarEne
+   opcion2m:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[20]  
+        cmp al, 187
+        je incrSi2m
+
+           
+        inc al
+        mov cordY2[20],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[20]
+        cmp al, 00h
+        je incrSi2m
+
+        jmp regresarEne 
+        incrSi2m:
+            mov vidaEne2[20],0
+            mov opcionEne2, 'n'
+            jmp regresarEne
+   opcion2n:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[21]  
+        cmp al, 187
+        je incrSi2n
+
+           
+        inc al
+        mov cordY2[21],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[21]
+        cmp al, 00h
+        je incrSi2n
+
+        jmp regresarEne 
+        incrSi2n:
+            mov vidaEne2[21],0
+            mov opcionEne2, 'o'
+            jmp regresarEne
+
+   opcion2o:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[22]  
+        cmp al, 187
+        je incrSi2o
+
+           
+        inc al
+        mov cordY2[22],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[22]
+        cmp al, 00h
+        je incrSi2o
+
+        jmp regresarEne 
+        incrSi2o:
+            mov vidaEne2[22],0
+            mov opcionEne2, 'p'
+            jmp regresarEne
+   opcion2p:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[23]  
+        cmp al, 187
+        je incrSi2p
+
+           
+        inc al
+        mov cordY2[23],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[23]
+        cmp al, 00h
+        je incrSi2p
+
+        jmp regresarEne 
+        incrSi2p:
+            mov vidaEne2[23],0
+            mov opcionEne2, 'q'
+            jmp regresarEne
+
+   opcion2q:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[24]  
+        cmp al, 187
+        je incrSi2q
+
+           
+        inc al
+        mov cordY2[24],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[24]
+        cmp al, 00h
+        je incrSi2q
+
+        jmp regresarEne 
+        incrSi2q:
+            mov vidaEne2[24],0
+            mov opcionEne2, 'r'
+            jmp regresarEne
+   opcion2r:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[25]  
+        cmp al, 187
+        je incrSi2r
+
+           
+        inc al
+        mov cordY2[25],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[25]
+        cmp al, 00h
+        je incrSi2r
+
+        jmp regresarEne 
+        incrSi2r:
+            mov vidaEne2[25],0
+            mov opcionEne2, 's'
+            jmp regresarEne
+   opcion2s:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[26]  
+        cmp al, 187
+        je incrSi2s
+
+           
+        inc al
+        mov cordY2[26],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[26]
+        cmp al, 00h
+        je incrSi2s
+
+        jmp regresarEne 
+        incrSi2s:
+            mov vidaEne2[26],0
+            mov opcionEne2, 't'
+            jmp regresarEne
+   opcion2t:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[27]  
+        cmp al, 187
+        je incrSi2t
+
+           
+        inc al
+        mov cordY2[27],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[27]
+        cmp al, 00h
+        je incrSi2t
+
+        jmp regresarEne 
+        incrSi2t:
+            mov vidaEne2[27],0
+            mov opcionEne2, 'u'
+            jmp regresarEne
+   opcion2u:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[28]  
+        cmp al, 187
+        je incrSi2u
+
+           
+        inc al
+        mov cordY2[28],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[28]
+        cmp al, 00h
+        je incrSi2u
+
+        jmp regresarEne 
+        incrSi2u:
+            mov vidaEne2[28],0
+            mov opcionEne2, 'v'
+            jmp regresarEne
+opcion2v:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[29]  
+        cmp al, 187
+        je incrSi2v
+
+           
+        inc al
+        mov cordY2[29],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[29]
+        cmp al, 00h
+        je incrSi2v
+
+        jmp regresarEne 
+        incrSi2v:
+            mov vidaEne2[29],0
+            mov opcionEne2, 'w'
+            jmp regresarEne
+   opcion2w:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[30]  
+        cmp al, 187
+        je incrSi2w
+
+           
+        inc al
+        mov cordY2[30],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[30]
+        cmp al, 00h
+        je incrSi2w
+
+        jmp regresarEne 
+        incrSi2w:
+            mov vidaEne2[30],0
+            mov opcionEne2, 'x'
+            jmp regresarEne
+   opcion2x:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[31]  
+        cmp al, 187
+        je incrSi2x
+
+           
+        inc al
+        mov cordY2[31],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[31]
+        cmp al, 00h
+        je incrSi2x
+
+        jmp regresarEne 
+        incrSi2x:
+            mov vidaEne2[31],0
+            mov opcionEne2, 'y'
+            jmp regresarEne
+   opcion2y:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[32]  
+        cmp al, 187
+        je incrSi2y
+
+           
+        inc al
+        mov cordY2[32],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[32]
+        cmp al, 00h
+        je incrSi2y
+
+        jmp regresarEne 
+        incrSi2y:
+            mov vidaEne2[32],0
+            mov opcionEne2, 01h
+            jmp regresarEne
+   opcionaa:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[33]  
+        cmp al, 187
+        je incrSiaa
+
+           
+        inc al
+        mov cordY2[33],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[33]
+        cmp al, 00h
+        je incrSiaa
+
+        jmp regresarEne 
+        incrSiaa:
+            mov vidaEne2[33],0
+            mov opcionEne2, 02h
+            jmp regresarEne
+   opcionab:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[34]  
+        cmp al, 187
+        je incrSiab
+
+           
+        inc al
+        mov cordY2[34],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[34]
+        cmp al, 00h
+        je incrSiab
+
+        jmp regresarEne 
+        incrSiab:
+            mov vidaEne2[34],0
+            mov opcionEne2, 03h
+            jmp regresarEne
+   opcionac:
+        dibujarEnemigo2
+        lea dx, cordY2 
+        mov al, cordY2[35]  
+        cmp al, 187
+        je incrSiac
+
+           
+        inc al
+        mov cordY2[35],al
+        
+        
+        lea dx, vidaEne2
+        mov al, vidaEne2[35]
+        cmp al, 00h
+        je incrSiac
+
+        jmp regresarEne 
+        incrSiac:
+            mov vidaEne2[35],0
+            mov opcionEne2, 04h
+            jmp regresarEne
+    saliAqui2:
+        dibujarEnemigo2
+        jmp regresarEne  
+
+    pop bx
+    pop ax 
+    pop si ;*********************-
 moverizq:
     push ax
     mov ax, xnave; movemos la posicion de la nave al registro ax
@@ -2812,8 +3956,10 @@ pausa:
     mov al, contadorPausa[0]
     cmp al, 00h
     je pausa0
-     cmp al, 01h
-    je pausa0
+    cmp al, 01h
+    je pausa1
+    cmp al, 02h
+    je pausa2
 
     pausa0:
           
@@ -2856,7 +4002,32 @@ pausa:
             cmp al, 1Bh;escB
             je pausa
             jmp pausa;vuelve al inicio del juevo para repintar la pantalla  
+    pausa2:
+           
+            mov ah, 02h
+            mov bh, 00h
+            mov dh, 18
+            mov dl, 0
+            int 10h
 
+            mov dx, offset spaceEmpezar2
+            mov ah, 09h
+            int 21h
+            mov ax, 0000
+
+            call GetChar;verifica la tecla que pulso
+            cmp al, 20h;tecla de espacio
+            je empezarJuego1
+            jne pausa2
+            empezarJuego1:
+            mov contadorPausa, 03h
+            mov opcionEne2, '1'
+            jmp inicioj
+
+    pausaNivel2:
+        mov contadorPausa, 02h
+        
+        jmp pausa
     ka:   
       mov contKami, 01h
       jmp inicioj
