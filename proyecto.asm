@@ -1,4 +1,4 @@
-.model small
+.model medium
 .stack
 .data
     msg1        db 'Iniciar Sesion', 10, 13, '$'
@@ -34,33 +34,23 @@
     memory      db  250 dup('$') 
     controlMemory  dw  0     
     
-    
-    
     tamus       dw  0
     tampass     dw  0 
     lockedTemp  dw  0
-
     livescount db 3
-    
     usuarios    db  'proyecto', 92, 'users.txt', 0
     auxcontenidoar db   1 dup('$')
     controlusers   dw  0
     controltype    dw  0 
     controllock    dw  0
-    
     controlpass     dw  0
     tamarch         dw  0
     handle      dw  ?
     handle2 dw ?    ; Guardar asa
-
     tempDelay dw 1000
     unidades db 9
     decenas db 2 
-
     nullEne db 0 
-
-
-    
     cabeza db "        Universidad San Carlos De Guatemala ",10,13
     db "        Facultad De Ingeneria ", 10, 13
     db "        Escuela de ciencias y sistemas ", 10, 13
@@ -213,6 +203,7 @@
     unidadesCont db 0
     decenasCont db 0
     contKami db 0
+    contKami1 db 0 
     contadorPausa db 0
 
     spaceEmpezar  db 'Space to', 10, 13,'Start', 10, 13, 'lvl 1','$'
@@ -880,7 +871,6 @@ dibujarEnemigo macro
         jmp saltarVer
 
         ver:
-            
             mov ax, 00000h
             lea dx, cordx
             mov al, cordX[si] 
@@ -1077,10 +1067,33 @@ dibujarEnemigo2 macro
         auxdiblinea moustro38, 8
 
         pop si
-        inc si
-        jmp regreso
 
-    
+        mov ax,00000h
+        lea dx, cordY2
+        mov al, cordY2[si]  
+        cmp ax, ydis[0]
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        inc al
+        cmp ydis[0],ax
+        je ver
+        jmp saltarVer
+        ver:     
+            mov ax,00000h
+            lea dx, cordY2
+            mov al, cordY2[si]  
+            cmp ax, ydis[0]
+        
+              
+        saltarVer:
     salirr:
     pop si
     
@@ -3007,12 +3020,6 @@ moverEne2:
     push bx
     push si
 
-      
-    ;inc movMoustro2
-    ;mov ax, movMoustro2
-    ;cmp al, 2
-    ;jne saliAqui2
-   
     mov movMoustro2, 0
 
     mov ax, opcionEne2
@@ -4028,6 +4035,9 @@ pausa:
         mov contadorPausa, 02h
         
         jmp pausa
+    ka1:
+      mov contKami1, 01h
+      jmp inicioj
     ka:   
       mov contKami, 01h
       jmp inicioj
